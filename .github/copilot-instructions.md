@@ -47,6 +47,26 @@ answer to how this stack satisfies the shared requirements: `architecture-specif
 `logging-observability.md`, `environment-setup-guide.md`, `devops-pipeline.md`,
 `dependency-policy.md`, `module-registry.md`.
 
+## Stay in this stack
+
+This workspace contains five repositories. Four implement the **same REST contract in different
+technologies**, and their specification documents deliberately look similar — which makes reading
+the wrong one an easy and quiet mistake.
+
+- **Your specifications are `stacks/angular/` and nothing else.** Never read another stack's
+  `stacks/` document for implementation guidance.
+- `shared/` applies to every repository. `stacks/` applies to exactly one.
+- **The specific trap:** `stacks/nodejs/error-handling.md` and `stacks/springboot/error-handling.md`
+  are **byte-identical through section 5** and diverge only at section 6. The same is true of the two
+  frontends' `ui-specifications.md` (identical §1–2) and both backends' `testing-standards.md`
+  (identical §1–5). So the wrong file reads correctly for most of its length and then hands you the
+  wrong implementation — Spring exception handling in an Express service, or JUnit patterns in a
+  Vitest suite. **Check the path before trusting a section.**
+- A `@workspace` search returns hits from all four stacks. The path is the only thing that tells you
+  which one you are reading.
+- **Never write source code into another repository's folder.** If a task seems to need a change in a
+  sibling repository, say so and stop — that is a separate task in a separate repo.
+
 ## This repo's specifics
 
 - **Standalone components only.** No `NgModule` declarations for new code. `OnPush` everywhere.
