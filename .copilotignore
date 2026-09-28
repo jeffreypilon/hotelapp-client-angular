@@ -1,0 +1,27 @@
+# Pure generated/derived output only -- never useful for diagnosing a bug, and often large.
+# gitignore syntax; no negation support; VS Code Copilot reads this at extension startup only
+# (restart the window after editing).
+#
+# This repo is still an empty stub (README/.gitignore only) as of 2026-09-28 -- written ahead of
+# the code that will need it, per stacks/angular/environment-setup-guide.md's documented `dist/`
+# build output and `.angular/` CLI cache. Revisit once real code exists, the same way
+# hotelapp-client-react's copy was refined against what actually got built rather than guessed in
+# advance.
+#
+# Deliberately NOT here, once built: src/environments/*.ts, or anything config-shaped. Those files
+# hold the same runtime backend-switching config React's env.ts implements -- exactly the kind of
+# thing Copilot has legitimately needed to read before (the CORS/port-config debugging in the
+# sibling repos), and there's nothing secret in them for this demo app.
+
+node_modules/
+dist/
+.angular/
+coverage/
+
+# Real secret material, if any is ever added -- none exists in this repo today.
+*.pem
+*.key
+*.p12
+
+.idea/
+.vscode/
