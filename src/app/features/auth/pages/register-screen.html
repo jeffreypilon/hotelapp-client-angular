@@ -1,0 +1,116 @@
+<app-auth-layout title="Create account">
+  <form (ngSubmit)="onSubmit()" [formGroup]="form" novalidate class="flex flex-col gap-4">
+    @if (formError()) {
+      <div
+        role="alert"
+        aria-live="assertive"
+        class="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+      >
+        {{ formError() }}
+        @if (seconds() > 0) {
+          <span> Try again in {{ seconds() }}s.</span>
+        }
+      </div>
+    }
+
+    <label for="firstName" class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+      First name
+      <input
+        id="firstName"
+        autocomplete="given-name"
+        maxlength="100"
+        [attr.aria-invalid]="firstNameError() ? true : null"
+        [attr.aria-describedby]="firstNameError() ? 'firstName-error' : null"
+        class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+        formControlName="firstName"
+      />
+      @if (firstNameError()) {
+        <span id="firstName-error" class="text-xs text-red-700">{{ firstNameError() }}</span>
+      }
+    </label>
+
+    <label for="lastName" class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+      Last name
+      <input
+        id="lastName"
+        autocomplete="family-name"
+        maxlength="100"
+        [attr.aria-invalid]="lastNameError() ? true : null"
+        [attr.aria-describedby]="lastNameError() ? 'lastName-error' : null"
+        class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+        formControlName="lastName"
+      />
+      @if (lastNameError()) {
+        <span id="lastName-error" class="text-xs text-red-700">{{ lastNameError() }}</span>
+      }
+    </label>
+
+    <label for="email" class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+      Email
+      <input
+        id="email"
+        type="email"
+        autocomplete="email"
+        maxlength="320"
+        [attr.aria-invalid]="emailError() ? true : null"
+        [attr.aria-describedby]="emailError() ? 'email-error' : null"
+        class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+        formControlName="email"
+      />
+      @if (emailError()) {
+        <span id="email-error" class="text-xs text-red-700">
+          {{ emailError() }}
+          @if (emailTaken()) {
+            <a routerLink="/login" class="font-medium underline">Log in instead</a>
+          }
+        </span>
+      }
+    </label>
+
+    <app-password-field
+      [control]="form.controls.password"
+      controlId="password"
+      label="Password"
+      autoComplete="new-password"
+      hint="12–24 characters"
+      [maxLength]="24"
+      [error]="passwordError()"
+    />
+
+    <label for="phone" class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+      Phone <span class="font-normal text-slate-500">Optional</span>
+      <input
+        id="phone"
+        type="tel"
+        autocomplete="tel"
+        inputmode="numeric"
+        placeholder="(000) 000-0000"
+        [attr.aria-invalid]="phoneError() ? true : null"
+        [attr.aria-describedby]="phoneError() ? 'phone-error' : null"
+        class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+        formControlName="phone"
+      />
+      @if (phoneError()) {
+        <span id="phone-error" class="text-xs text-red-700">{{ phoneError() }}</span>
+      }
+    </label>
+
+    <button
+      type="submit"
+      [disabled]="disabled()"
+      class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+    >
+      {{ isSubmitting() ? 'Creating account…' : 'Create account' }}
+    </button>
+  </form>
+
+  <span footer>
+    Already have an account?
+    <a
+      routerLink="/login"
+      [queryParams]="loginQueryParams()"
+      class="font-medium text-slate-900 underline"
+      >Log in</a
+    >
+  </span>
+</app-auth-layout>

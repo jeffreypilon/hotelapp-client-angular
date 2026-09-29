@@ -25,6 +25,15 @@ export const routes: Routes = [
       import('./features/search/pages/search-screen').then((m) => m.SearchScreen),
   },
   {
+    path: 'login',
+    loadComponent: () => import('./features/auth/pages/login-screen').then((m) => m.LoginScreen),
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./features/auth/pages/register-screen').then((m) => m.RegisterScreen),
+  },
+  {
     path: 'room-types/:roomTypeId',
     loadComponent: () =>
       import('./features/properties/pages/room-type-detail-screen').then(

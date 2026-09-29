@@ -13,3 +13,8 @@ export function formatPhoneNumber(value: string): string {
   if (digits.length < 7) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
   return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
 }
+
+/** True once formatPhoneNumber has produced a complete 10-digit number, not a partial one. */
+export function isCompletePhoneNumber(value: string): boolean {
+  return value.replace(/\D/g, '').length === 10;
+}

@@ -16,7 +16,13 @@ interface ProblemDetails {
   errors?: FieldError[];
 }
 
-/** RATE_LIMITED's Retry-After is always delta-seconds here, never an HTTP-date -- per api-contracts.md. */
+/**
+ * api-contracts.md documents that a 429 carries `Retry-After` but not which of the two HTTP-legal
+ * forms (delta-seconds or an HTTP-date) it uses. Every response observed from both backends so
+ * far is delta-seconds, so that's the only form parsed; an HTTP-date value would fail `Number()`
+ * and fall through to `undefined` rather than throw, degrading to "no countdown shown" instead of
+ * a crash.
+ */
 function parseRetryAfter(header: string | null): number | undefined {
   if (header === null) return undefined;
   const seconds = Number(header);

@@ -15,6 +15,25 @@ export interface User {
   propertyId: string | null;
 }
 
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  /**
+   * Omitted (never sent as `null`) when blank -- hotelapp-server-nodejs's `POST /auth/register`
+   * schema currently rejects an explicit `null` here (`phone` is `.optional()` but not
+   * `.nullable()`, unlike `PATCH /me`'s own phone field), confirmed live. Sending "absent" rather
+   * than "null" for an unset optional field works against both backends either way.
+   */
+  phone?: string;
+}
+
 export interface Address {
   line1: string;
   line2: string | null;

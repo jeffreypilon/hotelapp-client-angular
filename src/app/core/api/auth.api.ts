@@ -2,7 +2,7 @@ import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SUPPRESS_AUTH_REDIRECT } from './http.interceptor';
-import type { User } from './types';
+import type { LoginRequest, RegisterRequest, User } from './types';
 
 export interface MeResponse {
   user: User;
@@ -22,5 +22,14 @@ export class AuthApi {
 
   logout(): Observable<void> {
     return this.http.post<void>('/auth/logout', {});
+  }
+
+  /** Login and registration return the same body, per api-contracts.md -- both log the guest in. */
+  login(body: LoginRequest): Observable<MeResponse> {
+    return this.http.post<MeResponse>('/auth/login', body);
+  }
+
+  register(body: RegisterRequest): Observable<MeResponse> {
+    return this.http.post<MeResponse>('/auth/register', body);
   }
 }

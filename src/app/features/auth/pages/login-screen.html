@@ -1,0 +1,59 @@
+<app-auth-layout title="Log in">
+  <form (ngSubmit)="onSubmit()" [formGroup]="form" novalidate class="flex flex-col gap-4">
+    @if (formError()) {
+      <div
+        role="alert"
+        aria-live="assertive"
+        class="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+      >
+        {{ formError() }}
+        @if (seconds() > 0) {
+          <span> Try again in {{ seconds() }}s.</span>
+        }
+      </div>
+    }
+
+    <label for="email" class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+      Email
+      <input
+        id="email"
+        type="email"
+        autocomplete="email"
+        maxlength="320"
+        [attr.aria-invalid]="emailError() ? true : null"
+        [attr.aria-describedby]="emailError() ? 'email-error' : null"
+        class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+        formControlName="email"
+      />
+      @if (emailError()) {
+        <span id="email-error" class="text-xs text-red-700">{{ emailError() }}</span>
+      }
+    </label>
+
+    <app-password-field
+      [control]="form.controls.password"
+      controlId="password"
+      label="Password"
+      autoComplete="current-password"
+      [error]="passwordError()"
+    />
+
+    <button
+      type="submit"
+      [disabled]="disabled()"
+      class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+    >
+      {{ isSubmitting() ? 'Logging in…' : 'Log in' }}
+    </button>
+  </form>
+
+  <span footer>
+    Don't have an account?
+    <a
+      routerLink="/register"
+      [queryParams]="registerQueryParams()"
+      class="font-medium text-slate-900 underline"
+      >Create one</a
+    >
+  </span>
+</app-auth-layout>
