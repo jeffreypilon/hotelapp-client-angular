@@ -1,0 +1,88 @@
+@if (isPending()) {
+  <main class="mx-auto max-w-2xl px-4 py-8">
+    <div class="h-64 animate-pulse rounded-lg bg-slate-200"></div>
+  </main>
+} @else if (isError()) {
+  <main class="mx-auto max-w-md px-4 py-24 text-center">
+    <h1 class="text-2xl font-semibold text-slate-900">
+      {{ resolveError(store.reservationErrorValue(), 'reservation').message }}
+    </h1>
+    <a routerLink="/" class="mt-4 inline-block font-medium text-slate-900 underline">
+      Back to our hotels
+    </a>
+  </main>
+} @else if (reservation(); as r) {
+  <main class="mx-auto max-w-2xl px-4 py-8 print:py-0">
+    <div class="text-center">
+      <span aria-hidden="true" class="text-4xl">✅</span>
+      <h1 class="mt-2 text-2xl font-semibold text-slate-900">Your reservation is confirmed</h1>
+
+      <div class="mt-4 flex items-center justify-center gap-3">
+        <span class="font-mono text-3xl font-bold tracking-wide text-slate-900">
+          {{ r.confirmationNumber }}
+        </span>
+        <button
+          type="button"
+          (click)="copyConfirmationNumber()"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 print:hidden"
+        >
+          {{ copied() ? 'Copied' : 'Copy' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-8 rounded-lg border border-slate-200 p-4">
+      <h2 class="text-lg font-medium text-slate-900">{{ r.property.name }}</h2>
+      <p class="mt-2 text-sm font-medium text-slate-900">{{ r.roomType.name }}</p>
+      <p class="text-sm text-slate-600">Room {{ r.room.roomNumber }}</p>
+
+      <p class="mt-2 text-sm text-slate-700">
+        {{ formatDate(r.checkInDate) }} – {{ formatDate(r.checkOutDate) }} · {{ r.nights }}
+        {{ r.nights === 1 ? 'night' : 'nights' }}
+      </p>
+      <p class="text-sm text-slate-700">
+        {{ r.numGuests }} {{ r.numGuests === 1 ? 'guest' : 'guests' }}
+      </p>
+      @if (r.rateCategory !== 'NONE') {
+        <p class="text-sm text-slate-700">
+          {{ rateCategoryLabel(referenceData.rateCategories(), r.rateCategory) }}
+        </p>
+      }
+
+      <div class="mt-3 border-t border-slate-200 pt-3 text-sm text-slate-700">
+        <div class="flex justify-between">
+          <span>
+            {{ r.pricing.nightlyRate | money: r.pricing.currency }} × {{ r.nights }}
+            {{ r.nights === 1 ? 'night' : 'nights' }}
+          </span>
+          <span>{{ r.pricing.totalAmount | money: r.pricing.currency }}</span>
+        </div>
+        <div
+          class="mt-2 flex justify-between border-t border-slate-200 pt-2 text-base font-semibold text-slate-900"
+        >
+          <span>Total</span>
+          <span>{{ r.pricing.totalAmount | money: r.pricing.currency }}</span>
+        </div>
+      </div>
+
+      <p class="mt-3 text-sm text-slate-600">
+        Free cancellation until {{ formatTimestamp(r.cancellation.deadline, r.property.timezone) }}.
+        After that, this reservation is non-refundable.
+      </p>
+    </div>
+
+    <p class="mt-4 text-sm text-slate-500">
+      A confirmation email would be sent in a production deployment.
+    </p>
+
+    <div class="mt-6 flex flex-wrap gap-4 print:hidden">
+      <a routerLink="/account/reservations" class="font-medium text-slate-900 underline">
+        View my reservations
+      </a>
+      <a routerLink="/" class="font-medium text-slate-900 underline">Book another stay</a>
+      <button type="button" (click)="print()" class="font-medium text-slate-900 underline">
+        Print
+      </button>
+    </div>
+  </main>
+}

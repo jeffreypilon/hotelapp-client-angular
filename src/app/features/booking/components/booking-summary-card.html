@@ -1,0 +1,50 @@
+<div class="rounded-lg border border-slate-200 p-4">
+  <h2 class="text-lg font-medium text-slate-900">{{ property().name }}</h2>
+  @if (variant() === 'full') {
+    <p class="text-sm text-slate-600">
+      {{ property().address.line1
+      }}{{ property().address.line2 ? ', ' + property().address.line2 : '' }},
+      {{ property().address.city }}, {{ property().address.stateProvince }}
+      {{ property().address.postalCode }}
+    </p>
+  }
+
+  <p class="mt-2 text-sm font-medium text-slate-900">{{ result().roomType.name }}</p>
+  @if (variant() === 'full') {
+    <p class="text-sm text-slate-600">{{ result().roomType.bedConfiguration }}</p>
+  }
+
+  <p class="mt-2 text-sm text-slate-700">
+    {{ formatDate(checkInDate()) }} – {{ formatDate(checkOutDate()) }} ·
+    {{ result().pricing.nights }} {{ result().pricing.nights === 1 ? 'night' : 'nights' }}
+  </p>
+  <p class="text-sm text-slate-700">
+    {{ numGuests() }} {{ numGuests() === 1 ? 'guest' : 'guests' }}
+  </p>
+  @if (rateCategoryLabel()) {
+    <p class="text-sm text-slate-700">{{ rateCategoryLabel() }}</p>
+  }
+
+  <div class="mt-3 border-t border-slate-200 pt-3 text-sm text-slate-700">
+    <div class="flex justify-between">
+      <span>
+        {{ result().pricing.nightlyRate | money: result().pricing.currency }} ×
+        {{ result().pricing.nights }} {{ result().pricing.nights === 1 ? 'night' : 'nights' }}
+      </span>
+      <span>{{ result().pricing.totalAmount | money: result().pricing.currency }}</span>
+    </div>
+    <div
+      class="mt-2 flex justify-between border-t border-slate-200 pt-2 text-base font-semibold text-slate-900"
+    >
+      <span>Total</span>
+      <span>{{ result().pricing.totalAmount | money: result().pricing.currency }}</span>
+    </div>
+  </div>
+
+  @if (variant() === 'full') {
+    <p class="mt-3 text-sm text-slate-600">
+      Free cancellation until {{ formatTimestamp(cancellationDeadline(), timezone()) }}. After that,
+      this reservation is non-refundable.
+    </p>
+  }
+</div>

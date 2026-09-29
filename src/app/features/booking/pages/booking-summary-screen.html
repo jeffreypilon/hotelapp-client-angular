@@ -1,0 +1,51 @@
+@if (store.isContextPending()) {
+  <main class="mx-auto max-w-2xl px-4 py-8">
+    <div class="h-64 animate-pulse rounded-lg bg-slate-200"></div>
+  </main>
+} @else if (store.isContextError()) {
+  <main class="mx-auto max-w-md px-4 py-24 text-center">
+    <h1 class="text-2xl font-semibold text-slate-900">
+      {{ resolveError(store.contextError(), 'property').message }}
+    </h1>
+    <a routerLink="/" class="mt-4 inline-block font-medium text-slate-900 underline">
+      Back to our hotels
+    </a>
+  </main>
+} @else if (store.notAvailable() || !store.result()) {
+  <main class="mx-auto max-w-md px-4 py-24 text-center">
+    <h1 class="text-2xl font-semibold text-slate-900">Those dates are no longer available.</h1>
+    <a
+      [routerLink]="['/properties', propertyId(), 'search']"
+      [queryParams]="searchQueryParams()"
+      class="mt-4 inline-block font-medium text-slate-900 underline"
+    >
+      Back to search
+    </a>
+  </main>
+} @else {
+  <main class="mx-auto max-w-2xl px-4 py-8">
+    <h1 class="text-2xl font-semibold text-slate-900">Review your booking</h1>
+
+    <div class="mt-6">
+      <app-booking-summary-card
+        [property]="store.property()!"
+        [result]="store.result()!"
+        [checkInDate]="checkInDate()"
+        [checkOutDate]="checkOutDate()"
+        [numGuests]="numGuests()"
+        [rateCategoryLabel]="rateCategoryLabelText()"
+        [cancellationDeadline]="cancellationDeadline(checkInDate(), store.property()!.timezone)"
+        [timezone]="store.property()!.timezone"
+        variant="full"
+      />
+    </div>
+
+    <a
+      [routerLink]="['/properties', propertyId(), 'book', 'payment']"
+      [queryParams]="searchQueryParams()"
+      class="mt-6 inline-block rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+    >
+      Continue to payment
+    </a>
+  </main>
+}

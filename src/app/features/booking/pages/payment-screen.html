@@ -1,0 +1,186 @@
+@if (store.isContextPending()) {
+  <main class="mx-auto max-w-2xl px-4 py-8">
+    <div class="h-64 animate-pulse rounded-lg bg-slate-200"></div>
+  </main>
+} @else if (store.isContextError()) {
+  <main class="mx-auto max-w-md px-4 py-24 text-center">
+    <h1 class="text-2xl font-semibold text-slate-900">
+      {{ resolveError(store.contextError(), 'property').message }}
+    </h1>
+    <a routerLink="/" class="mt-4 inline-block font-medium text-slate-900 underline">
+      Back to our hotels
+    </a>
+  </main>
+} @else if (showUnavailable()) {
+  <main class="mx-auto max-w-md px-4 py-24 text-center">
+    <h1 class="text-2xl font-semibold text-slate-900">That room is no longer offered.</h1>
+    <a
+      [routerLink]="['/properties', propertyId()]"
+      class="mt-4 inline-block font-medium text-slate-900 underline"
+    >
+      Back to the hotel
+    </a>
+  </main>
+} @else {
+  <main class="relative mx-auto max-w-2xl px-4 py-8">
+    @if (isSubmitting()) {
+      <div
+        role="status"
+        aria-live="assertive"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-white/80"
+      >
+        <p class="text-lg font-medium text-slate-900">Confirming your booking…</p>
+      </div>
+    }
+
+    <h1 class="text-2xl font-semibold text-slate-900">Payment</h1>
+
+    <div
+      role="alert"
+      class="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+    >
+      This is a demo. No payment is processed and no card details are stored. Do not enter a real
+      card number.
+    </div>
+
+    <div class="mt-6">
+      <app-booking-summary-card
+        [property]="store.property()!"
+        [result]="store.result()!"
+        [checkInDate]="checkInDate()"
+        [checkOutDate]="checkOutDate()"
+        [numGuests]="numGuests()"
+        [rateCategoryLabel]="rateCategoryLabelText()"
+        [cancellationDeadline]="cancellationDeadline(checkInDate(), store.property()!.timezone)"
+        [timezone]="store.property()!.timezone"
+        variant="condensed"
+      />
+    </div>
+
+    @if (formError()) {
+      <div
+        role="alert"
+        aria-live="assertive"
+        class="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+      >
+        {{ formError() }}
+        @if (roomUnavailable()) {
+          <a
+            [routerLink]="['/properties', propertyId(), 'search']"
+            [queryParams]="searchQueryParams()"
+            class="mt-2 block font-medium underline"
+          >
+            Back to search
+          </a>
+        }
+      </div>
+    }
+
+    <form (ngSubmit)="onSubmit()" [formGroup]="form" novalidate class="mt-6 flex flex-col gap-4">
+      <label for="cardholderName" class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Cardholder name
+        <input
+          id="cardholderName"
+          autocomplete="cc-name"
+          maxlength="100"
+          [attr.aria-invalid]="cardholderNameError() ? true : null"
+          class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+          [attr.disabled]="isSubmitting() ? true : null"
+          formControlName="cardholderName"
+        />
+        @if (cardholderNameError()) {
+          <span class="text-xs text-red-700">{{ cardholderNameError() }}</span>
+        }
+      </label>
+
+      <label for="cardNumber" class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Card number
+        <input
+          id="cardNumber"
+          autocomplete="cc-number"
+          inputmode="numeric"
+          placeholder="0000 0000 0000 0000"
+          [attr.aria-invalid]="cardNumberError() ? true : null"
+          class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+          [attr.disabled]="isSubmitting() ? true : null"
+          formControlName="cardNumber"
+        />
+        @if (cardNumberError()) {
+          <span class="text-xs text-red-700">{{ cardNumberError() }}</span>
+        }
+      </label>
+
+      <div class="flex gap-4">
+        <label
+          for="expiryMonth"
+          class="flex flex-1 flex-col gap-1 text-sm font-medium text-slate-700"
+        >
+          Expiry month
+          <input
+            id="expiryMonth"
+            autocomplete="cc-exp-month"
+            inputmode="numeric"
+            placeholder="MM"
+            [attr.aria-invalid]="expiryError() ? true : null"
+            class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+            [attr.disabled]="isSubmitting() ? true : null"
+            formControlName="expiryMonth"
+          />
+        </label>
+        <label
+          for="expiryYear"
+          class="flex flex-1 flex-col gap-1 text-sm font-medium text-slate-700"
+        >
+          Expiry year
+          <input
+            id="expiryYear"
+            autocomplete="cc-exp-year"
+            inputmode="numeric"
+            placeholder="YYYY"
+            [attr.aria-invalid]="expiryError() ? true : null"
+            class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+            [attr.disabled]="isSubmitting() ? true : null"
+            formControlName="expiryYear"
+          />
+        </label>
+        <label for="cvv" class="flex flex-1 flex-col gap-1 text-sm font-medium text-slate-700">
+          CVV
+          <input
+            id="cvv"
+            autocomplete="cc-csc"
+            inputmode="numeric"
+            [attr.aria-invalid]="cvvError() ? true : null"
+            class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+            [attr.disabled]="isSubmitting() ? true : null"
+            formControlName="cvv"
+          />
+        </label>
+      </div>
+      @if (expiryError()) {
+        <span class="text-xs text-red-700">{{ expiryError() }}</span>
+      }
+      @if (cvvError()) {
+        <span class="text-xs text-red-700">{{ cvvError() }}</span>
+      }
+
+      <button
+        type="submit"
+        [disabled]="isSubmitting()"
+        class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+      >
+        {{ isSubmitting() ? 'Confirming…' : 'Confirm booking' }}
+      </button>
+    </form>
+
+    <details class="mt-6 rounded-md border border-slate-200 p-3 text-sm text-slate-700">
+      <summary class="cursor-pointer font-medium">Test card numbers</summary>
+      <ul class="mt-2 flex flex-col gap-1">
+        @for (card of testCards; track card.number) {
+          <li>
+            <span class="font-mono">{{ card.number }}</span> — {{ card.result }}
+          </li>
+        }
+      </ul>
+    </details>
+  </main>
+}

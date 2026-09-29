@@ -172,3 +172,62 @@ export interface AvailabilityResponse {
   data: AvailabilityResult[];
   pagination: Pagination;
 }
+
+/**
+ * S6's form shape, per api-contracts.md's POST /reservations request body. Component-local form
+ * state only -- never cached, logged, or persisted, per security-implementation.md#payment-data.
+ */
+export interface PaymentInput {
+  cardholderName: string;
+  cardNumber: string;
+  expiryMonth: number;
+  expiryYear: number;
+  cvv: string;
+}
+
+export interface CreateReservationRequest {
+  roomTypeId: string;
+  checkInDate: string;
+  checkOutDate: string;
+  numGuests: number;
+  rateCategory: string;
+  payment: PaymentInput;
+}
+
+/**
+ * POST /reservations' embedded pricing -- confirmed against the React client's live response to
+ * carry no `nights` or `rateCategory` (those live at the top level of `Reservation` instead),
+ * unlike `Pricing` above which is GET /availability's shape. Conflating the two silently dropped
+ * the nights count on S7 there -- typed narrowly here rather than assumed from that shape.
+ */
+export interface ReservationPricing {
+  baseRate: string;
+  discountPercent: string;
+  nightlyRate: string;
+  totalAmount: string;
+  currency: string;
+}
+
+export interface CancellationStatus {
+  deadline: string;
+  isRefundableNow: boolean;
+}
+
+/** The full POST /reservations response shape -- also what GET /reservations/{id} returns. */
+export interface Reservation {
+  id: string;
+  confirmationNumber: string;
+  status: string;
+  property: { id: string; name: string; timezone: string };
+  roomType: { id: string; code: string; name: string };
+  room: { id: string; roomNumber: string };
+  checkInDate: string;
+  checkOutDate: string;
+  nights: number;
+  numGuests: number;
+  rateCategory: string;
+  pricing: ReservationPricing;
+  cancellation: CancellationStatus;
+  payment: { status: string; cardBrand: string; cardLastFour: string; processedAt: string };
+  bookedAt: string;
+}

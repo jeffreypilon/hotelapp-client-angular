@@ -1,4 +1,6 @@
-import { Routes } from '@angular/router';
+import { CanDeactivateFn, Routes } from '@angular/router';
+import { authGuard } from './guards/auth.guard';
+import type { PaymentScreen } from './features/booking/pages/payment-screen';
 
 /** One route tree, per architecture-specification.md. Paths mirror ui-specifications.md. */
 export const routes: Routes = [
@@ -23,6 +25,33 @@ export const routes: Routes = [
     path: 'properties/:propertyId/search',
     loadComponent: () =>
       import('./features/search/pages/search-screen').then((m) => m.SearchScreen),
+  },
+  {
+    path: 'properties/:propertyId/book',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/booking/pages/booking-summary-screen').then((m) => m.BookingSummaryScreen),
+  },
+  {
+    path: 'properties/:propertyId/book/payment',
+    canActivate: [authGuard],
+    // A dynamic-import wrapper, not a static import of paymentCanDeactivateGuard -- a static
+    // import here would pull PaymentScreen (and everything it depends on) into the main bundle,
+    // defeating this route's own lazy loadComponent below.
+    canDeactivate: [
+      (...args: Parameters<CanDeactivateFn<PaymentScreen>>) =>
+        import('./features/booking/pages/payment-screen').then((m) =>
+          m.paymentCanDeactivateGuard(...args),
+        ),
+    ],
+    loadComponent: () =>
+      import('./features/booking/pages/payment-screen').then((m) => m.PaymentScreen),
+  },
+  {
+    path: 'reservations/:reservationId/confirmation',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/booking/pages/confirmation-screen').then((m) => m.ConfirmationScreen),
   },
   {
     path: 'login',
