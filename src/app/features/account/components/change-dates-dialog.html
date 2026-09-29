@@ -1,0 +1,110 @@
+<dialog
+  #dialog
+  (close)="onClose()"
+  (click)="onBackdropClick($event)"
+  (keydown)="onBackdropKeydown($event)"
+  tabindex="-1"
+  aria-label="Change dates"
+  class="w-full max-w-md rounded-lg border border-slate-200 p-6 backdrop:bg-slate-900/40"
+>
+  @if (!outcome()) {
+    <form (ngSubmit)="submit()" class="flex flex-col gap-4">
+      <h2 class="text-lg font-semibold text-slate-900">Change dates</h2>
+
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Check-in
+        <input
+          type="date"
+          [ngModel]="checkInDate()"
+          (ngModelChange)="checkInDate.set($event)"
+          name="checkInDate"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        />
+        @if (dateErrors().checkInDate; as error) {
+          <span class="text-xs text-red-700">{{ error }}</span>
+        }
+      </label>
+
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Check-out
+        <input
+          type="date"
+          [ngModel]="checkOutDate()"
+          (ngModelChange)="checkOutDate.set($event)"
+          name="checkOutDate"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        />
+        @if (dateErrors().checkOutDate; as error) {
+          <span class="text-xs text-red-700">{{ error }}</span>
+        }
+      </label>
+
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Guests
+        <input
+          type="number"
+          [min]="1"
+          [max]="maxGuests"
+          [ngModel]="numGuests()"
+          (ngModelChange)="numGuests.set($event)"
+          name="numGuests"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Rate category
+        <select
+          [ngModel]="rateCategory()"
+          (ngModelChange)="rateCategory.set($event)"
+          name="rateCategory"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        >
+          @for (o of referenceData.rateCategories(); track o.value) {
+            <option [value]="o.value">{{ o.label }}</option>
+          }
+        </select>
+      </label>
+
+      @if (formError(); as error) {
+        <div
+          role="alert"
+          aria-live="assertive"
+          class="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+        >
+          {{ error }}
+        </div>
+      }
+
+      <div class="mt-2 flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="close()"
+          [disabled]="isPending()"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700"
+        >
+          Keep reservation
+        </button>
+        <button
+          type="submit"
+          [disabled]="isPending()"
+          class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60"
+        >
+          {{ isPending() ? 'Saving…' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
+  } @else {
+    <h2 class="text-lg font-semibold text-slate-900">Dates changed</h2>
+    <p class="mt-3 text-sm text-slate-700">{{ confirmationMessage() }}</p>
+    <div class="mt-6 flex justify-end">
+      <button
+        type="button"
+        (click)="close()"
+        class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white"
+      >
+        Done
+      </button>
+    </div>
+  }
+</dialog>

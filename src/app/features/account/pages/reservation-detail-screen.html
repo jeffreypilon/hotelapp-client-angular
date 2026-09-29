@@ -1,0 +1,156 @@
+<main class="mx-auto max-w-2xl px-4 py-8">
+  <a routerLink="/account/reservations" class="text-sm font-medium text-slate-600 underline">
+    ← My reservations
+  </a>
+
+  @if (store.isReservationPending()) {
+    <div class="mt-4 h-64 animate-pulse rounded-lg bg-slate-200"></div>
+  }
+
+  @if (store.isReservationError()) {
+    <div class="mt-24 px-4 py-24 text-center">
+      <h1 class="text-2xl font-semibold text-slate-900">
+        {{ resolveError(store.reservationError(), 'reservation').message }}
+      </h1>
+      <a
+        routerLink="/account/reservations"
+        class="mt-4 inline-block font-medium text-slate-900 underline"
+      >
+        Back to my reservations
+      </a>
+    </div>
+  }
+
+  @if (store.reservation(); as r) {
+    <div class="mt-4 flex items-center justify-between gap-3">
+      <h1 class="text-2xl font-semibold text-slate-900">{{ r.confirmationNumber }}</h1>
+      <app-reservation-status-badge [status]="r.status" />
+    </div>
+
+    <div class="mt-6 rounded-lg border border-slate-200 p-4">
+      <h2 class="text-lg font-medium text-slate-900">{{ r.property.name }}</h2>
+      <p class="mt-2 text-sm font-medium text-slate-900">{{ r.roomType.name }}</p>
+      <p class="text-sm text-slate-600">Room {{ r.room.roomNumber }}</p>
+
+      <p class="mt-2 text-sm text-slate-700" [class.line-through]="r.status === 'CANCELLED'">
+        {{ formatDate(r.checkInDate) }} – {{ formatDate(r.checkOutDate) }} · {{ r.nights }}
+        {{ r.nights === 1 ? 'night' : 'nights' }}
+      </p>
+      <p class="text-sm text-slate-700">
+        {{ r.numGuests }} {{ r.numGuests === 1 ? 'guest' : 'guests' }}
+      </p>
+      @if (r.rateCategory !== 'NONE') {
+        <p class="text-sm text-slate-700">
+          {{ rateCategoryLabel(referenceData.rateCategories(), r.rateCategory) }}
+        </p>
+      }
+
+      <div class="mt-3 border-t border-slate-200 pt-3 text-sm text-slate-700">
+        <div class="flex justify-between">
+          <span>
+            {{ formatMoney(r.pricing.nightlyRate, r.pricing.currency) }} × {{ r.nights }}
+            {{ r.nights === 1 ? 'night' : 'nights' }}
+          </span>
+          <span>{{ formatMoney(r.pricing.totalAmount, r.pricing.currency) }}</span>
+        </div>
+        <div
+          class="mt-2 flex justify-between border-t border-slate-200 pt-2 text-base font-semibold text-slate-900"
+        >
+          <span>Total</span>
+          <span>{{ formatMoney(r.pricing.totalAmount, r.pricing.currency) }}</span>
+        </div>
+      </div>
+
+      @if (r.status === 'CONFIRMED') {
+        <p class="mt-3 text-sm text-slate-600">
+          Free cancellation until
+          {{ formatTimestamp(r.cancellation.deadline, r.property.timezone) }}.
+        </p>
+      }
+    </div>
+
+    <div class="mt-6 rounded-lg border border-slate-200 p-4">
+      @if (r.status === 'CONFIRMED' && r.cancellation.isRefundableNow) {
+        <div class="flex flex-wrap gap-3">
+          <button
+            type="button"
+            (click)="openChangeDialog()"
+            class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700"
+          >
+            Change dates
+          </button>
+          <button
+            type="button"
+            (click)="openCancelDialog()"
+            class="rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700"
+          >
+            Cancel reservation
+          </button>
+        </div>
+      }
+
+      @if (r.status === 'CONFIRMED' && !r.cancellation.isRefundableNow) {
+        <div>
+          <p class="text-sm text-slate-600">
+            Changes are no longer available for this reservation.
+          </p>
+          <button
+            type="button"
+            (click)="openCancelDialog()"
+            class="mt-3 rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700"
+          >
+            Cancel reservation (non-refundable)
+          </button>
+        </div>
+      }
+
+      @if (r.status === 'CHECKED_IN') {
+        <p class="text-sm text-slate-600">You're currently checked in.</p>
+      }
+
+      @if (r.status === 'CHECKED_OUT') {
+        <p class="text-sm text-slate-600">This stay is complete.</p>
+      }
+
+      @if (r.status === 'CANCELLED') {
+        @if (cancelOutcome(); as outcome) {
+          <p class="text-sm text-slate-600">
+            Cancelled {{ formatTimestamp(outcome.cancelledAt, r.property.timezone) }}.
+            @if (outcome.refund) {
+              Refunded {{ formatMoney(outcome.refund.amount, outcome.refund.currency) }}.
+            } @else {
+              This cancellation was non-refundable.
+            }
+          </p>
+        } @else {
+          <!-- A page load of a reservation cancelled in an earlier session -- the cancel-time
+               outcome (cancelledAt, exact refund amount) isn't part of GET /reservations/{id}'s
+               documented shape, so this falls back to what that response does carry. -->
+          <p class="text-sm text-slate-600">
+            This reservation was cancelled.
+            {{ r.cancellation.isRefundableNow ? 'It was refundable.' : 'It was non-refundable.' }}
+          </p>
+        }
+      }
+    </div>
+
+    @if (cancelDialogOpen()) {
+      <app-cancel-dialog
+        [reservationId]="r.id"
+        [totalAmount]="r.pricing.totalAmount"
+        [currency]="r.pricing.currency"
+        [isRefundableNow]="r.cancellation.isRefundableNow"
+        (dismissed)="closeCancelDialog()"
+        (cancelled)="onCancelled($event)"
+      />
+    }
+
+    @if (changeDialogOpen()) {
+      <app-change-dates-dialog
+        [reservation]="r"
+        (dismissed)="closeChangeDialog()"
+        (changed)="onChanged()"
+      />
+    }
+  }
+</main>

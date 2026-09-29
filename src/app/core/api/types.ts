@@ -231,3 +231,45 @@ export interface Reservation {
   payment: { status: string; cardBrand: string; cardLastFour: string; processedAt: string };
   bookedAt: string;
 }
+
+/**
+ * GET /reservations' own contract text, not `Reservation` reused -- narrower, per the same
+ * summary-vs-detail split as `PropertyRoomTypeSummary`/`ReservationPricing` above. No `room`,
+ * `pricing`, `payment`, or `bookedAt` here.
+ */
+export interface ReservationSummary {
+  id: string;
+  confirmationNumber: string;
+  status: string;
+  property: { id: string; name: string };
+  roomType: { code: string; name: string };
+  checkInDate: string;
+  checkOutDate: string;
+  nights: number;
+  totalAmount: string;
+  currency: string;
+  cancellation: CancellationStatus;
+}
+
+export interface ReservationListResponse {
+  data: ReservationSummary[];
+  pagination: Pagination;
+}
+
+/** POST /reservations/{id}/cancel's response -- deliberately smaller than `Reservation`. */
+export interface CancelReservationResponse {
+  id: string;
+  confirmationNumber: string;
+  status: string;
+  cancelledAt: string;
+  wasRefundable: boolean;
+  refund: { status: string; amount: string; currency: string } | null;
+}
+
+/** PATCH /reservations/{id}'s request body -- roomTypeId/propertyId/pricing are not changeable here. */
+export interface PatchReservationRequest {
+  checkInDate?: string;
+  checkOutDate?: string;
+  numGuests?: number;
+  rateCategory?: string;
+}

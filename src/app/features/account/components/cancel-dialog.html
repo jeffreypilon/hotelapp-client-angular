@@ -1,0 +1,67 @@
+<dialog
+  #dialog
+  (close)="onClose()"
+  (click)="onBackdropClick($event)"
+  (keydown)="onBackdropKeydown($event)"
+  tabindex="-1"
+  aria-label="Cancel reservation"
+  class="w-full max-w-md rounded-lg border border-slate-200 p-6 backdrop:bg-slate-900/40"
+>
+  @if (!outcome()) {
+    <h2 class="text-lg font-semibold text-slate-900">Cancel reservation</h2>
+    <p class="mt-3 text-sm text-slate-700">
+      @if (isRefundableNow()) {
+        You'll receive a full refund of {{ totalAmount() | money: currency() }}.
+      } @else {
+        This cancellation is non-refundable. You will not receive a refund.
+      }
+    </p>
+
+    @if (formError(); as error) {
+      <div
+        role="alert"
+        aria-live="assertive"
+        class="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+      >
+        {{ error }}
+      </div>
+    }
+
+    <div class="mt-6 flex justify-end gap-3">
+      <button
+        type="button"
+        (click)="close()"
+        [disabled]="isPending()"
+        class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700"
+      >
+        Keep reservation
+      </button>
+      <button
+        type="button"
+        (click)="confirm()"
+        [disabled]="isPending()"
+        class="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
+      >
+        {{ isPending() ? 'Cancelling…' : 'Cancel reservation' }}
+      </button>
+    </div>
+  } @else {
+    <h2 class="text-lg font-semibold text-slate-900">Reservation cancelled</h2>
+    <p class="mt-3 text-sm text-slate-700">
+      @if (outcome()!.refund; as refund) {
+        You'll receive a full refund of {{ refund.amount | money: refund.currency }}.
+      } @else {
+        This cancellation was non-refundable.
+      }
+    </p>
+    <div class="mt-6 flex justify-end">
+      <button
+        type="button"
+        (click)="close()"
+        class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white"
+      >
+        Done
+      </button>
+    </div>
+  }
+</dialog>

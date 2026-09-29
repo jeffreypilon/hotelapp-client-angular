@@ -54,6 +54,22 @@ export const routes: Routes = [
       import('./features/booking/pages/confirmation-screen').then((m) => m.ConfirmationScreen),
   },
   {
+    path: 'account/reservations',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/account/pages/reservation-list-screen').then(
+        (m) => m.ReservationListScreen,
+      ),
+  },
+  {
+    path: 'account/reservations/:reservationId',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/account/pages/reservation-detail-screen').then(
+        (m) => m.ReservationDetailScreen,
+      ),
+  },
+  {
     path: 'login',
     loadComponent: () => import('./features/auth/pages/login-screen').then((m) => m.LoginScreen),
   },
