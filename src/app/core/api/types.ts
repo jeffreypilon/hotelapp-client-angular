@@ -273,3 +273,43 @@ export interface PatchReservationRequest {
   numGuests?: number;
   rateCategory?: string;
 }
+
+/**
+ * GET /me's full shape -- the mirror image of every prior summary/detail split: `User` (the
+ * session shape from GET /auth/me) is the narrower one here, and this is the fuller one. `email`
+ * and `role` are read-only on this screen; there is no self-service escalation or identity change.
+ */
+export interface Profile {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string | null;
+  /** `null` for a guest who has never set one -- not an object of empty strings, confirmed live
+   * against a freshly-registered guest. */
+  address: Address | null;
+  role: Role;
+  propertyId: string | null;
+  createdAt: string;
+}
+
+/**
+ * PATCH /me's request body -- an omitted field is unchanged, an explicit null clears `phone`.
+ * `address.line2` is the one exception: confirmed live that hotelapp-server-nodejs's zod schema
+ * rejects an explicit `null` there (`.optional()` without `.nullable()`, unlike every other
+ * address field) -- the key must be omitted entirely to clear it. Spring Boot's own
+ * `ProfileService.textOrNull` treats "omitted" and "null" identically, so omitting works against
+ * both backends; sending `null` only works against one. Same class of gap as the phone/register
+ * defect found in Step 4.
+ */
+export interface PatchProfileRequest {
+  firstName?: string;
+  lastName?: string;
+  phone?: string | null;
+  address?: Omit<Address, 'line2'> & { line2?: string };
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}

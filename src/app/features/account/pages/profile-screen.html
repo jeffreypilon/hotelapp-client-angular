@@ -1,0 +1,268 @@
+<main class="mx-auto max-w-2xl px-4 py-8">
+  <h1 class="text-2xl font-semibold text-slate-900">Profile</h1>
+
+  @if (store.isLoading()) {
+    <div class="mt-6 flex flex-col gap-3">
+      @for (i of [0, 1, 2, 3]; track i) {
+        <div class="h-10 animate-pulse rounded-md bg-slate-200"></div>
+      }
+    </div>
+  }
+
+  @if (store.isError()) {
+    <div role="alert" class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+      <p>{{ resolveError(store.error()).message }}</p>
+      <button
+        type="button"
+        (click)="store.loadProfile()"
+        class="mt-2 rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+      >
+        Try again
+      </button>
+    </div>
+  }
+
+  @if (store.profile(); as profile) {
+    <div class="mt-6">
+      @if (successMessage()) {
+        <div
+          role="status"
+          aria-live="polite"
+          class="mb-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800"
+        >
+          {{ successMessage() }}
+        </div>
+      }
+      @if (formError()) {
+        <div
+          role="alert"
+          aria-live="assertive"
+          class="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+        >
+          {{ formError() }}
+        </div>
+      }
+
+      <div class="flex flex-col gap-1">
+        <span class="text-sm font-medium text-slate-700">Email</span>
+        <span class="text-sm text-slate-900">{{ profile.email }}</span>
+        <span class="text-xs text-slate-500">Email cannot be changed.</span>
+      </div>
+
+      @if (!editing()) {
+        <div class="mt-6 flex flex-col gap-4">
+          <div class="flex flex-col gap-1">
+            <span class="text-sm font-medium text-slate-700">First name</span>
+            <span class="text-sm text-slate-900">{{ profile.firstName }}</span>
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="text-sm font-medium text-slate-700">Last name</span>
+            <span class="text-sm text-slate-900">{{ profile.lastName }}</span>
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="text-sm font-medium text-slate-700">Phone</span>
+            <span class="text-sm text-slate-900">
+              {{ profile.phone ? formatPhoneNumber(profile.phone) : 'Not provided' }}
+            </span>
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="text-sm font-medium text-slate-700">Address</span>
+            @if (hasAnyAddressField(profile)) {
+              <address class="text-sm text-slate-900 not-italic">
+                <div>{{ profile.address?.line1 }}</div>
+                @if (profile.address?.line2) {
+                  <div>{{ profile.address.line2 }}</div>
+                }
+                <div>
+                  {{ profile.address?.city }}, {{ profile.address?.stateProvince }}
+                  {{ profile.address?.postalCode }}
+                </div>
+                <div>{{ profile.address?.countryCode }}</div>
+              </address>
+            } @else {
+              <span class="text-sm text-slate-500">Not provided</span>
+            }
+          </div>
+          <div class="flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              (click)="startEditing()"
+              class="self-start rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white"
+            >
+              Edit profile
+            </button>
+            <a routerLink="/account/password" class="text-sm font-medium text-slate-700 underline">
+              Change password
+            </a>
+          </div>
+        </div>
+      } @else {
+        <form
+          (ngSubmit)="onSubmit()"
+          [formGroup]="form"
+          novalidate
+          class="mt-6 flex flex-col gap-4"
+        >
+          <label for="firstName" class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+            First name
+            <input
+              id="firstName"
+              autocomplete="given-name"
+              maxlength="100"
+              [attr.aria-invalid]="firstNameError() ? true : null"
+              class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              [attr.disabled]="submitting() ? true : null"
+              formControlName="firstName"
+            />
+            @if (firstNameError()) {
+              <span class="text-xs text-red-700">{{ firstNameError() }}</span>
+            }
+          </label>
+
+          <label for="lastName" class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+            Last name
+            <input
+              id="lastName"
+              autocomplete="family-name"
+              maxlength="100"
+              [attr.aria-invalid]="lastNameError() ? true : null"
+              class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              [attr.disabled]="submitting() ? true : null"
+              formControlName="lastName"
+            />
+            @if (lastNameError()) {
+              <span class="text-xs text-red-700">{{ lastNameError() }}</span>
+            }
+          </label>
+
+          <label for="phone" class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+            Phone
+            <input
+              id="phone"
+              type="tel"
+              autocomplete="tel"
+              inputmode="numeric"
+              placeholder="(000) 000-0000"
+              [attr.aria-invalid]="phoneError() ? true : null"
+              class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              [attr.disabled]="submitting() ? true : null"
+              formControlName="phone"
+            />
+            @if (phoneError()) {
+              <span class="text-xs text-red-700">{{ phoneError() }}</span>
+            }
+          </label>
+
+          <fieldset class="flex flex-col gap-4" formGroupName="address">
+            <legend class="text-sm font-medium text-slate-700">Address</legend>
+            <label for="line1" class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+              Address line 1
+              <input
+                id="line1"
+                autocomplete="address-line1"
+                maxlength="200"
+                class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+                [attr.disabled]="submitting() ? true : null"
+                formControlName="line1"
+              />
+            </label>
+            <label for="line2" class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+              Address line 2
+              <input
+                id="line2"
+                autocomplete="address-line2"
+                maxlength="200"
+                class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+                [attr.disabled]="submitting() ? true : null"
+                formControlName="line2"
+              />
+            </label>
+            <div class="flex gap-4">
+              <label
+                for="city"
+                class="flex flex-1 flex-col gap-1 text-sm font-medium text-slate-700"
+              >
+                City
+                <input
+                  id="city"
+                  autocomplete="address-level2"
+                  maxlength="120"
+                  class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+                  [attr.disabled]="submitting() ? true : null"
+                  formControlName="city"
+                />
+              </label>
+              <label
+                for="stateProvince"
+                class="flex flex-1 flex-col gap-1 text-sm font-medium text-slate-700"
+              >
+                State / Province
+                <input
+                  id="stateProvince"
+                  autocomplete="address-level1"
+                  maxlength="120"
+                  class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+                  [attr.disabled]="submitting() ? true : null"
+                  formControlName="stateProvince"
+                />
+              </label>
+            </div>
+            <div class="flex gap-4">
+              <label
+                for="postalCode"
+                class="flex flex-1 flex-col gap-1 text-sm font-medium text-slate-700"
+              >
+                Postal code
+                <input
+                  id="postalCode"
+                  autocomplete="postal-code"
+                  maxlength="20"
+                  class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+                  [attr.disabled]="submitting() ? true : null"
+                  formControlName="postalCode"
+                />
+              </label>
+              <label
+                for="countryCode"
+                class="flex flex-1 flex-col gap-1 text-sm font-medium text-slate-700"
+              >
+                Country code
+                <input
+                  id="countryCode"
+                  autocomplete="country"
+                  placeholder="US"
+                  maxlength="2"
+                  [attr.aria-invalid]="countryCodeError() ? true : null"
+                  class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+                  [attr.disabled]="submitting() ? true : null"
+                  formControlName="countryCode"
+                />
+                @if (countryCodeError()) {
+                  <span class="text-xs text-red-700">{{ countryCodeError() }}</span>
+                }
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="flex gap-3">
+            <button
+              type="submit"
+              [disabled]="submitting()"
+              class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            >
+              {{ submitting() ? 'Saving…' : 'Save changes' }}
+            </button>
+            <button
+              type="button"
+              (click)="cancelEdit()"
+              [disabled]="submitting()"
+              class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      }
+    </div>
+  }
+</main>

@@ -70,6 +70,18 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'account/password',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/account/pages/password-screen').then((m) => m.PasswordScreen),
+  },
+  {
+    path: 'account',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/account/pages/profile-screen').then((m) => m.ProfileScreen),
+  },
+  {
     path: 'login',
     loadComponent: () => import('./features/auth/pages/login-screen').then((m) => m.LoginScreen),
   },
