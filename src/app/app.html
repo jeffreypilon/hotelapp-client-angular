@@ -1,0 +1,17 @@
+<div class="flex min-h-screen flex-col">
+  <app-header />
+  @if (session.networkError() && !bannerDismissed()) {
+    <div role="alert" class="bg-amber-50 px-4 py-2 text-sm text-amber-900">
+      <div class="mx-auto flex max-w-5xl items-center justify-between gap-4">
+        <span>Unable to reach the server.</span>
+        <button type="button" (click)="dismissBanner()" class="font-medium underline">
+          Dismiss
+        </button>
+      </div>
+    </div>
+  }
+  <div class="flex-1">
+    <router-outlet />
+  </div>
+  <app-footer />
+</div>

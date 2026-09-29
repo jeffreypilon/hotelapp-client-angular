@@ -1,0 +1,128 @@
+<main class="mx-auto max-w-5xl px-4 py-8">
+  <h1 class="text-2xl font-semibold text-slate-900">Our hotels</h1>
+
+  <div class="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div class="flex flex-col gap-4 sm:flex-row">
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Search by name or city
+        <input
+          type="search"
+          [ngModel]="qInput()"
+          (ngModelChange)="qInput.set($event)"
+          placeholder="Search by name or city"
+          maxlength="120"
+          class="w-64 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        />
+      </label>
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        City
+        <input
+          type="text"
+          [ngModel]="cityInput()"
+          (ngModelChange)="cityInput.set($event)"
+          placeholder="City"
+          maxlength="120"
+          class="w-40 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        />
+      </label>
+    </div>
+    <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+      Sort by
+      <select
+        [ngModel]="sort()"
+        (ngModelChange)="onSortChange($event)"
+        class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+      >
+        <option value="name:asc">Name</option>
+        <option value="city:asc">City</option>
+      </select>
+    </label>
+  </div>
+
+  @if (store.isLoading()) {
+    <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      @for (i of [0, 1, 2, 3, 4, 5]; track i) {
+        <div class="h-56 animate-pulse rounded-lg bg-slate-200"></div>
+      }
+    </div>
+  }
+
+  @if (store.isError()) {
+    <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800" role="alert">
+      <p>{{ store.error()?.detail || 'Something went wrong. Please try again.' }}</p>
+      <button
+        type="button"
+        (click)="
+          store.load({
+            page: page(),
+            pageSize: 20,
+            sort: sort(),
+            city: city() || undefined,
+            q: q() || undefined,
+          })
+        "
+        class="mt-2 rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+      >
+        Try again
+      </button>
+    </div>
+  }
+
+  @if (store.isEmpty() && isFiltered()) {
+    <div class="mt-6 text-slate-600">
+      <p>No hotels match your search.</p>
+      <button
+        type="button"
+        (click)="clearFilters()"
+        class="mt-2 font-medium text-slate-900 underline"
+      >
+        Clear filters
+      </button>
+    </div>
+  }
+
+  @if (store.isEmpty() && !isFiltered()) {
+    <p class="mt-6 text-slate-600">No hotels are available right now.</p>
+  }
+
+  @if (!store.isLoading() && !store.isError() && store.results().length > 0) {
+    <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      @for (property of store.results(); track property.id) {
+        <a
+          [routerLink]="['/properties', property.slug]"
+          class="overflow-hidden rounded-lg border border-slate-200 shadow-sm transition hover:shadow-md"
+        >
+          <article>
+            <div
+              class="flex aspect-video items-center justify-center bg-slate-100 text-2xl font-semibold text-slate-400"
+            >
+              @if (safeImageUrl.resolve(property.photoUrl); as photoUrl) {
+                <img [src]="photoUrl" alt="" loading="lazy" class="h-full w-full object-cover" />
+              } @else {
+                {{ getInitials(property.name) }}
+              }
+            </div>
+            <div class="p-4">
+              <h2 class="text-lg font-medium text-slate-900">{{ property.name }}</h2>
+              <p class="text-sm text-slate-600">
+                {{ property.address.city }}, {{ property.address.stateProvince }}
+              </p>
+              <p class="mt-2 line-clamp-2 text-sm text-slate-700">{{ property.description }}</p>
+              <p class="mt-2 text-sm text-slate-500">{{ roomTypeCountLabel(property) }}</p>
+            </div>
+          </article>
+        </a>
+      }
+    </div>
+
+    @if (store.pagination(); as pagination) {
+      <app-pagination
+        [page]="pagination.page"
+        [totalPages]="pagination.totalPages"
+        [hasPreviousPage]="pagination.hasPreviousPage"
+        [hasNextPage]="pagination.hasNextPage"
+        (pageChange)="onPageChange($event)"
+      />
+    }
+  }
+</main>

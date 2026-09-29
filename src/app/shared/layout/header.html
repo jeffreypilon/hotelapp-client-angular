@@ -1,0 +1,108 @@
+<header class="border-b border-slate-200 bg-white">
+  <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+    <a routerLink="/" class="text-lg font-semibold text-slate-900">HotelApp</a>
+
+    <nav aria-label="Primary" class="hidden items-center gap-6 md:flex">
+      <a routerLink="/" class="text-sm font-medium text-slate-700 hover:text-slate-900"
+        >Our hotels</a
+      >
+      @if (session.role() !== null) {
+        <a routerLink="/admin" class="text-sm font-medium text-slate-700 hover:text-slate-900"
+          >Admin</a
+        >
+      }
+    </nav>
+
+    <div class="hidden md:block">
+      <ng-container [ngTemplateOutlet]="userArea" />
+    </div>
+
+    <button
+      type="button"
+      class="md:hidden"
+      [attr.aria-expanded]="mobileMenuOpen()"
+      aria-controls="mobile-nav"
+      [attr.aria-label]="mobileMenuOpen() ? 'Close menu' : 'Open menu'"
+      (click)="toggleMobileMenu()"
+    >
+      <span aria-hidden="true" class="block text-2xl leading-none">{{
+        mobileMenuOpen() ? '✕' : '☰'
+      }}</span>
+    </button>
+  </div>
+
+  @if (mobileMenuOpen()) {
+    <nav id="mobile-nav" aria-label="Primary" class="border-t border-slate-200 px-4 py-3 md:hidden">
+      <a routerLink="/" class="block py-2 text-sm font-medium text-slate-700">Our hotels</a>
+      @if (session.role() !== null) {
+        <a routerLink="/admin" class="block py-2 text-sm font-medium text-slate-700">Admin</a>
+      }
+      <div class="mt-2 border-t border-slate-200 pt-2">
+        <ng-container [ngTemplateOutlet]="userArea" />
+      </div>
+    </nav>
+  }
+</header>
+
+<ng-template #userArea>
+  @if (!session.isResolved()) {
+    <div class="h-8 w-24 animate-pulse rounded-full bg-slate-200" aria-hidden="true"></div>
+  } @else if (!session.user()) {
+    <div class="flex items-center gap-4 text-sm font-medium">
+      <a routerLink="/login" class="text-slate-700 hover:text-slate-900">Log in</a>
+      <a routerLink="/register" class="text-slate-700 hover:text-slate-900">Create account</a>
+    </div>
+  } @else {
+    <div #userMenuRoot class="relative text-sm">
+      <button
+        type="button"
+        (click)="toggleUserMenu()"
+        aria-haspopup="menu"
+        [attr.aria-expanded]="userMenuOpen()"
+        class="flex items-center gap-3"
+      >
+        <span class="font-medium text-slate-900">{{ session.user()?.firstName }}</span>
+        @if (roleBadge(); as badge) {
+          <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">{{
+            badge
+          }}</span>
+        }
+        <span aria-hidden="true" class="text-slate-500">▾</span>
+      </button>
+
+      @if (userMenuOpen()) {
+        <div
+          role="menu"
+          class="absolute right-0 z-10 mt-2 w-48 rounded-md border border-slate-200 bg-white py-1 shadow-lg"
+        >
+          @if (session.role() === 'GUEST') {
+            <a
+              role="menuitem"
+              routerLink="/account/reservations"
+              (click)="closeUserMenu()"
+              class="block px-4 py-2 text-slate-700 hover:bg-slate-50"
+            >
+              My reservations
+            </a>
+            <a
+              role="menuitem"
+              routerLink="/account"
+              (click)="closeUserMenu()"
+              class="block px-4 py-2 text-slate-700 hover:bg-slate-50"
+            >
+              Profile
+            </a>
+          }
+          <button
+            type="button"
+            role="menuitem"
+            (click)="logout()"
+            class="block w-full px-4 py-2 text-left text-slate-700 hover:bg-slate-50"
+          >
+            Log out
+          </button>
+        </div>
+      }
+    </div>
+  }
+</ng-template>
