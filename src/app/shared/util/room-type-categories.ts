@@ -1,5 +1,5 @@
 /** The `room_type_code` enum from data-model.md -- shared by any screen labeling a room-type category. */
-const ROOM_TYPE_CATEGORY_LABELS: Record<string, string> = {
+export const ROOM_TYPE_CATEGORY_LABELS: Record<string, string> = {
   SINGLE: 'Single',
   DOUBLE: 'Double',
   KING: 'King',

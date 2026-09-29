@@ -1,0 +1,74 @@
+<article class="flex flex-col gap-4 rounded-lg border border-slate-200 p-4 sm:flex-row">
+  <div class="aspect-video w-full shrink-0 overflow-hidden rounded-md bg-slate-100 sm:w-56">
+    @if (safeImageUrl.resolve(result().roomType.primaryPhotoUrl); as photoUrl) {
+      <img [src]="photoUrl" alt="" loading="lazy" class="h-full w-full object-cover" />
+    } @else {
+      <div class="flex h-full items-center justify-center text-xl font-semibold text-slate-400">
+        {{ getInitials(result().roomType.name) }}
+      </div>
+    }
+  </div>
+
+  <div class="flex-1">
+    <div class="flex flex-wrap items-center gap-2">
+      <h3 class="text-lg font-medium text-slate-900">{{ result().roomType.name }}</h3>
+      @if (result().roomType.isAccessible) {
+        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+          Accessible
+        </span>
+      }
+    </div>
+    <p class="text-sm text-slate-600">{{ result().roomType.bedConfiguration }}</p>
+    <p class="text-sm text-slate-600">
+      {{ occupancyLabel(result().roomType.code, result().roomType.maxOccupancy) }}
+    </p>
+
+    @if (result().roomType.amenities.length > 0) {
+      <ul class="mt-2 flex flex-wrap gap-2">
+        @for (amenity of result().roomType.amenities; track amenity.code) {
+          <li class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">
+            {{ amenity.name }}
+          </li>
+        }
+      </ul>
+    }
+
+    @if (scarcityText(result().availableRoomCount); as scarcity) {
+      <p class="mt-2 text-sm font-medium text-amber-700">{{ scarcity }}</p>
+    }
+
+    <div class="mt-3">
+      <p class="text-lg font-semibold text-slate-900">
+        {{ result().pricing.nightlyRate | money: result().pricing.currency }} /
+        {{ rateUnit(result().roomType.code) }}
+        @if (hasDiscount()) {
+          <span class="ml-2 text-sm font-normal text-slate-500 line-through">
+            {{ result().pricing.baseRate | money: result().pricing.currency }}
+          </span>
+        }
+      </p>
+      <p class="text-sm text-slate-600">
+        {{ result().pricing.nights }} {{ result().pricing.nights === 1 ? 'night' : 'nights' }} ·
+        {{ result().pricing.totalAmount | money: result().pricing.currency }} total
+      </p>
+      @if (result().pricing.rateCategory !== 'NONE') {
+        <p class="text-sm text-slate-600">
+          {{
+            (rateCategoryLabels()[result().pricing.rateCategory] ?? result().pricing.rateCategory) +
+              ' rate applied'
+          }}
+        </p>
+      }
+    </div>
+  </div>
+
+  <div class="flex items-end sm:items-center">
+    <a
+      [routerLink]="['/properties', propertyId(), 'book']"
+      [queryParams]="bookQueryParams()"
+      class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium whitespace-nowrap text-white hover:bg-slate-700"
+    >
+      Select room
+    </a>
+  </div>
+</article>

@@ -107,3 +107,49 @@ export interface RoomType {
   amenities: Amenity[];
   photos: Photo[];
 }
+
+/** GET /availability's reference-list responses -- carries `sortOrder`, unlike `Amenity` above. */
+export interface AmenityReference {
+  code: string;
+  name: string;
+  sortOrder: number;
+}
+
+export interface RateCategoryOption {
+  value: string;
+  label: string;
+}
+
+/** GET /availability's embedded room-type shape -- flat, distinct from `RoomType` and `PropertyRoomTypeSummary`. */
+export interface AvailabilityRoomType {
+  id: string;
+  code: string;
+  name: string;
+  maxOccupancy: number;
+  bedConfiguration: string;
+  isAccessible: boolean;
+  amenities: Amenity[];
+  primaryPhotoUrl: string | null;
+}
+
+/** GET /availability's embedded pricing -- its own shape, not shared with the reservation response. */
+export interface Pricing {
+  rateCategory: string;
+  baseRate: string;
+  discountPercent: string;
+  nightlyRate: string;
+  nights: number;
+  totalAmount: string;
+  currency: string;
+}
+
+export interface AvailabilityResult {
+  roomType: AvailabilityRoomType;
+  pricing: Pricing;
+  availableRoomCount: number;
+}
+
+export interface AvailabilityResponse {
+  data: AvailabilityResult[];
+  pagination: Pagination;
+}

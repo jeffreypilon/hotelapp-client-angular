@@ -20,6 +20,11 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'properties/:propertyId/search',
+    loadComponent: () =>
+      import('./features/search/pages/search-screen').then((m) => m.SearchScreen),
+  },
+  {
     path: 'room-types/:roomTypeId',
     loadComponent: () =>
       import('./features/properties/pages/room-type-detail-screen').then(

@@ -1,0 +1,251 @@
+<main class="mx-auto max-w-6xl px-4 py-8">
+  @if (isNotFound()) {
+    <div class="mx-auto max-w-md py-24 text-center">
+      <h1 class="text-2xl font-semibold text-slate-900">We couldn't find that hotel.</h1>
+      <a routerLink="/" class="mt-4 inline-block font-medium text-slate-900 underline">
+        Back to our hotels
+      </a>
+    </div>
+  } @else {
+    <h1 class="text-2xl font-semibold text-slate-900">Search availability</h1>
+
+    <form
+      (submit)="$event.preventDefault()"
+      class="mt-6 flex flex-wrap items-start gap-4 rounded-lg border border-slate-200 p-4"
+    >
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Check-in
+        <input
+          type="date"
+          [ngModel]="checkInDate()"
+          (ngModelChange)="setDate('checkInDate', $event)"
+          name="checkInDate"
+          [attr.aria-describedby]="dateErrors().checkInDate ? 'checkInDate-error' : null"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        />
+        @if (dateErrors().checkInDate) {
+          <span id="checkInDate-error" class="text-xs text-red-700">{{
+            dateErrors().checkInDate
+          }}</span>
+        }
+      </label>
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Check-out
+        <input
+          type="date"
+          [ngModel]="checkOutDate()"
+          (ngModelChange)="setDate('checkOutDate', $event)"
+          name="checkOutDate"
+          [attr.aria-describedby]="dateErrors().checkOutDate ? 'checkOutDate-error' : null"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        />
+        @if (dateErrors().checkOutDate) {
+          <span id="checkOutDate-error" class="text-xs text-red-700">{{
+            dateErrors().checkOutDate
+          }}</span>
+        }
+      </label>
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Guests
+        <input
+          type="number"
+          [min]="1"
+          [max]="maxGuests"
+          [ngModel]="numGuests()"
+          (ngModelChange)="onNumGuestsChange($event)"
+          name="numGuests"
+          class="w-20 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        />
+      </label>
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Special rate
+        <select
+          [ngModel]="rateCategory()"
+          (ngModelChange)="setRateCategory($event)"
+          name="rateCategory"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        >
+          @for (option of referenceData.rateCategories(); track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          } @empty {
+            <option value="NONE">None</option>
+          }
+        </select>
+      </label>
+      @if (rateCategory() !== 'NONE') {
+        <button
+          type="button"
+          (click)="setRateCategory('NONE')"
+          class="self-end pb-1.5 text-sm font-medium text-slate-900 underline"
+        >
+          Clear selection
+        </button>
+      }
+    </form>
+
+    <div class="mt-6 flex flex-col gap-6 lg:flex-row">
+      <aside class="flex flex-col gap-6 lg:w-64 lg:shrink-0">
+        <fieldset class="flex flex-col gap-2">
+          <legend class="text-sm font-semibold text-slate-900">Room type</legend>
+          @for (code of roomTypeCodes; track code) {
+            <label class="flex items-center gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                [checked]="roomTypeCode().includes(code)"
+                (change)="toggleRepeatable('roomTypeCode', code)"
+              />
+              {{ roomTypeCategoryLabel(code) }}
+            </label>
+          }
+        </fieldset>
+
+        <fieldset class="flex flex-col gap-2">
+          <legend class="text-sm font-semibold text-slate-900">Amenities</legend>
+          @for (amenity of referenceData.amenities(); track amenity.code) {
+            <label class="flex items-center gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                [checked]="amenityCode().includes(amenity.code)"
+                (change)="toggleRepeatable('amenityCode', amenity.code)"
+              />
+              {{ amenity.name }}
+            </label>
+          }
+        </fieldset>
+
+        <label class="flex items-center gap-2 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            [checked]="accessibleOnly()"
+            (change)="setAccessibleOnly($any($event.target).checked)"
+          />
+          Accessible rooms only
+        </label>
+
+        <fieldset class="flex flex-col gap-2">
+          <legend class="text-sm font-semibold text-slate-900">Nightly rate</legend>
+          <label class="flex flex-col gap-1 text-sm text-slate-700">
+            Min
+            <input
+              type="number"
+              [min]="0"
+              [max]="maxNightlyRateLimit"
+              [ngModel]="minInput()"
+              (ngModelChange)="minInput.set($event)"
+              name="minNightlyRate"
+              class="w-24 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+            />
+          </label>
+          <label class="flex flex-col gap-1 text-sm text-slate-700">
+            Max
+            <input
+              type="number"
+              [min]="0"
+              [max]="maxNightlyRateLimit"
+              [ngModel]="maxInput()"
+              (ngModelChange)="maxInput.set($event)"
+              name="maxNightlyRate"
+              class="w-24 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+            />
+          </label>
+        </fieldset>
+      </aside>
+
+      <div class="flex-1">
+        <div class="flex items-center justify-between gap-4">
+          <div aria-live="polite" class="text-sm text-slate-600">
+            @if (store.pagination(); as pagination) {
+              {{ pagination.totalItems }} room types available.
+            }
+          </div>
+          <label class="flex items-center gap-2 text-sm font-medium text-slate-700">
+            Sort by
+            <select
+              [ngModel]="sort()"
+              (ngModelChange)="setSort($event)"
+              name="sort"
+              class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+            >
+              @for (option of sortOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        @if (!datesPresent()) {
+          <p class="mt-6 text-slate-600">
+            Choose check-in and check-out dates to see available rooms.
+          </p>
+        }
+
+        @if (canSearch() && store.isError()) {
+          <div
+            class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800"
+            role="alert"
+          >
+            <p>{{ store.error()?.detail || 'Something went wrong. Please try again.' }}</p>
+          </div>
+        }
+
+        @if (canSearch() && store.isLoading()) {
+          <div class="mt-6 flex flex-col gap-4">
+            @for (i of [0, 1, 2, 3]; track i) {
+              <div
+                data-testid="result-skeleton"
+                class="h-40 animate-pulse rounded-lg bg-slate-200"
+              ></div>
+            }
+          </div>
+        }
+
+        @if (canSearch() && store.isEmpty()) {
+          <div class="mt-6 text-slate-600">
+            <p>No rooms available for these dates.</p>
+            <div class="mt-2 flex gap-4">
+              <button
+                type="button"
+                (click)="tryDifferentDates()"
+                class="font-medium text-slate-900 underline"
+              >
+                Try different dates
+              </button>
+              <button
+                type="button"
+                (click)="clearFilters()"
+                class="font-medium text-slate-900 underline"
+              >
+                Clear filters
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (canSearch() && store.results().length > 0) {
+          <div class="mt-6 flex flex-col gap-4">
+            @for (result of store.results(); track result.roomType.id) {
+              <app-result-card
+                [result]="result"
+                [propertyId]="propertyId() ?? ''"
+                [checkInDate]="checkInDate()"
+                [checkOutDate]="checkOutDate()"
+                [numGuests]="numGuests()"
+                [rateCategory]="rateCategory()"
+                [rateCategoryLabels]="rateCategoryLabels()"
+              />
+            }
+          </div>
+          @if (store.pagination(); as pagination) {
+            <app-pagination
+              [page]="pagination.page"
+              [totalPages]="pagination.totalPages"
+              [hasPreviousPage]="pagination.hasPreviousPage"
+              [hasNextPage]="pagination.hasNextPage"
+              (pageChange)="setPage($event)"
+            />
+          }
+        }
+      </div>
+    </div>
+  }
+</main>
