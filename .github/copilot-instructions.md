@@ -119,6 +119,26 @@ one backend is drift.
   product is "dates only, no times", so confusing them is a business-logic bug.
 - **Commits** follow Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`). A commit
   implementing a contract change should reference the `hotelapp-context` commit that caused it.
+- **Commit AND push at the end of every step, once verification passes.** `git add` the changed
+  files, commit with a Conventional Commit message summarizing what the step built, then `git push`
+  — don't leave verified work sitting local-only for someone else to discover later. This applies
+  whether or not the prompt that kicked off the step says so explicitly. (This rule had to be added
+  mid-project to the React and Spring Boot repos' instructions after each shipped two steps fully
+  verified but uncommitted — starting Angular with it already in place, not after the same gap
+  repeats a third time.)
+- **Any new pure function or SignalStore method with non-obvious logic ships with unit tests in the
+  same commit.** This means date/time or money arithmetic (anything with a rounding, timezone, DST,
+  or boundary case), validation logic, a `rxMethod`'s stream-handling behavior (e.g. a `switchMap`
+  correctly discarding a stale response), and anything you manually verified against a spec's worked
+  examples (`acceptance-criteria.md` and similar) before calling it done — if you checked it by hand
+  against known-good values, write those same values down as a test instead of discarding the check
+  once it passes once. This is not optional the way visual/UI polish is, and it applies **regardless
+  of what the prompt for that step says** — React's Phase 7 Steps 3 and 5 each shipped
+  fully-verified-by-hand logic with zero tests, discovered only by checking file counts rather than
+  trusting the summary. New screens/components without their own dedicated logic (plain composition
+  of existing stores and presentational markup) are lower priority for this than a new file under
+  `lib/`/`core/` or a new store method — use judgment, but either is the strong default case for
+  "write the test."
 - Default branch is `main` in all five repositories.
 
 ## Build, test, and lint — NOT YET ESTABLISHED
