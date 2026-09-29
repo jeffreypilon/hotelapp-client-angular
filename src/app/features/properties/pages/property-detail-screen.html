@@ -1,0 +1,131 @@
+<main class="mx-auto max-w-5xl px-4 py-8">
+  @if (store.isDetailLoading()) {
+    <div class="aspect-[21/9] animate-pulse rounded-lg bg-slate-200"></div>
+    <div class="mt-8 flex flex-col gap-4">
+      <div class="h-40 animate-pulse rounded-lg bg-slate-200"></div>
+      <div class="h-40 animate-pulse rounded-lg bg-slate-200"></div>
+    </div>
+  }
+
+  @if (store.isDetailError()) {
+    <div class="mx-auto max-w-md py-24 text-center">
+      <h1 class="text-2xl font-semibold text-slate-900">
+        {{
+          store.detailError()?.code === 'NOT_FOUND'
+            ? "We couldn't find that hotel."
+            : store.detailError()?.detail || 'Something went wrong. Please try again.'
+        }}
+      </h1>
+      <a routerLink="/" class="mt-4 inline-block font-medium text-slate-900 underline">
+        Back to our hotels
+      </a>
+    </div>
+  }
+
+  @if (store.detail(); as property) {
+    <div
+      class="flex aspect-[21/9] items-center justify-center overflow-hidden rounded-lg bg-slate-100"
+    >
+      @if (safeImageUrl.resolve(property.photoUrl); as photoUrl) {
+        <img [src]="photoUrl" alt="" class="h-full w-full object-cover" />
+      } @else {
+        <span class="text-3xl font-semibold text-slate-400">{{ getInitials(property.name) }}</span>
+      }
+    </div>
+
+    <h1 class="mt-6 text-2xl font-semibold text-slate-900">{{ property.name }}</h1>
+    <p class="text-slate-600">
+      {{ property.address.line1 }}{{ property.address.line2 ? ', ' + property.address.line2 : '' }},
+      {{ property.address.city }}, {{ property.address.stateProvince }}
+      {{ property.address.postalCode }}
+    </p>
+    @if (property.phone) {
+      <p class="text-slate-600">{{ formatPhoneNumber(property.phone) }}</p>
+    }
+    <p class="mt-4 text-slate-700">{{ property.description }}</p>
+
+    <form
+      (submit)="$event.preventDefault(); checkAvailability()"
+      class="mt-6 flex flex-wrap items-end gap-4 rounded-lg border border-slate-200 p-4"
+    >
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Check-in
+        <input
+          type="date"
+          [ngModel]="checkInDate()"
+          (ngModelChange)="checkInDate.set($event)"
+          name="checkInDate"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        />
+      </label>
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Check-out
+        <input
+          type="date"
+          [ngModel]="checkOutDate()"
+          (ngModelChange)="checkOutDate.set($event)"
+          name="checkOutDate"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        />
+      </label>
+      <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+        Guests
+        <input
+          type="number"
+          [min]="1"
+          [max]="maxGuests"
+          [ngModel]="numGuests()"
+          (ngModelChange)="onNumGuestsChange($event)"
+          name="numGuests"
+          class="w-20 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        />
+      </label>
+      <button
+        type="submit"
+        class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+      >
+        Check availability
+      </button>
+    </form>
+
+    <h2 class="mt-10 text-xl font-semibold text-slate-900">Rooms</h2>
+
+    @if (store.isRoomTypesLoading()) {
+      <div class="mt-4 flex flex-col gap-4">
+        <div class="h-40 animate-pulse rounded-lg bg-slate-200"></div>
+        <div class="h-40 animate-pulse rounded-lg bg-slate-200"></div>
+      </div>
+    }
+
+    @if (store.isRoomTypesError()) {
+      <p class="mt-4 text-slate-600">
+        {{ store.roomTypesError()?.detail || 'Something went wrong. Please try again.' }}
+      </p>
+    }
+
+    @if (store.isRoomTypesEmpty()) {
+      <p class="mt-4 text-slate-600">This hotel has no rooms listed yet.</p>
+    }
+
+    @if (store.roomTypes().length > 0) {
+      <div class="mt-4 flex flex-col gap-4">
+        @for (roomType of store.roomTypes(); track roomType.id) {
+          <app-room-type-card
+            [roomType]="roomType"
+            (selectRoomType)="openRoomType(roomType.id)"
+            (checkAvailability)="checkAvailability(roomType.code)"
+          />
+        }
+      </div>
+    }
+  }
+</main>
+
+@if (openRoomTypeId()) {
+  <app-room-type-dialog
+    [roomType]="store.roomType()"
+    [isLoading]="store.isRoomTypeLoading()"
+    [error]="store.roomTypeError()"
+    (closed)="closeRoomTypeDialog()"
+  />
+}

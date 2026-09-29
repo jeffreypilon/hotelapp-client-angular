@@ -78,3 +78,32 @@ export interface PropertyDetail {
   roomTypeCount: number;
   roomTypes: PropertyRoomTypeSummary[];
 }
+
+export interface Amenity {
+  code: string;
+  name: string;
+}
+
+export interface Photo {
+  id: string;
+  url: string;
+  caption: string;
+  sortOrder: number;
+  isPrimary: boolean;
+}
+
+/** The full shape GET /properties/{propertyId}/room-types and GET /room-types/{roomTypeId} return. */
+export interface RoomType {
+  id: string;
+  propertyId: string;
+  code: string;
+  name: string;
+  description: string;
+  baseRate: string;
+  currency: string;
+  maxOccupancy: number;
+  bedConfiguration: string;
+  isAccessible: boolean;
+  amenities: Amenity[];
+  photos: Photo[];
+}

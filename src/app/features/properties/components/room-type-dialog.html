@@ -1,0 +1,32 @@
+<dialog
+  #dialog
+  (close)="onClose()"
+  (click)="onBackdropClick($event)"
+  (keydown)="onBackdropKeydown($event)"
+  tabindex="-1"
+  aria-label="Room details"
+  class="m-auto max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg p-6 backdrop:bg-black/50"
+>
+  <button
+    type="button"
+    (click)="dialog.close()"
+    aria-label="Close"
+    class="float-right text-lg text-slate-500 hover:text-slate-900"
+  >
+    ✕
+  </button>
+
+  @if (isLoading()) {
+    <div class="h-48 animate-pulse rounded-md bg-slate-200"></div>
+  }
+
+  @if (error(); as err) {
+    <p class="text-slate-700">
+      {{ err.code === 'NOT_FOUND' ? "We couldn't find that room." : err.detail }}
+    </p>
+  }
+
+  @if (roomType(); as roomType) {
+    <app-room-type-detail-content [roomType]="roomType" />
+  }
+</dialog>

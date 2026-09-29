@@ -1,0 +1,52 @@
+<div>
+  <div class="flex flex-wrap items-center gap-2">
+    <h2 class="text-xl font-semibold text-slate-900">{{ roomType().name }}</h2>
+    @if (roomType().isAccessible) {
+      <span
+        class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700"
+        aria-label="This room type is wheelchair accessible"
+      >
+        Accessible
+      </span>
+    }
+  </div>
+  <p class="text-sm text-slate-600">{{ roomTypeCategoryLabel(roomType().code) }}</p>
+
+  @if (roomType().photos.length > 0) {
+    <div class="mt-4 flex gap-2 overflow-x-auto">
+      @for (photo of roomType().photos; track photo.id) {
+        @if (safeImageUrl.resolve(photo.url); as photoUrl) {
+          <img
+            [src]="photoUrl"
+            [alt]="photo.caption"
+            loading="lazy"
+            class="h-40 w-64 shrink-0 rounded-md object-cover"
+          />
+        }
+      }
+    </div>
+  }
+
+  <p class="mt-4 text-slate-700">{{ roomType().description }}</p>
+
+  <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+    <dt class="text-slate-500">Bed configuration</dt>
+    <dd class="text-slate-900">{{ roomType().bedConfiguration }}</dd>
+    <dt class="text-slate-500">Occupancy</dt>
+    <dd class="text-slate-900">{{ occupancyLabel(roomType().code, roomType().maxOccupancy) }}</dd>
+  </dl>
+
+  @if (roomType().amenities.length > 0) {
+    <ul class="mt-4 flex flex-wrap gap-2">
+      @for (amenity of roomType().amenities; track amenity.code) {
+        <li class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">
+          {{ amenity.name }}
+        </li>
+      }
+    </ul>
+  }
+
+  <p class="mt-4 font-medium text-slate-900">
+    From {{ roomType().baseRate | money: roomType().currency }} / {{ rateUnit(roomType().code) }}
+  </p>
+</div>
