@@ -1,15 +1,11 @@
-<header class="border-b border-slate-200 bg-white">
+<header class="sticky top-0 z-20 bg-brand text-white">
   <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-    <a routerLink="/" class="text-lg font-semibold text-slate-900">HotelApp</a>
+    <a routerLink="/" class="text-lg font-semibold">HotelApp</a>
 
     <nav aria-label="Primary" class="hidden items-center gap-6 md:flex">
-      <a routerLink="/" class="text-sm font-medium text-slate-700 hover:text-slate-900"
-        >Our hotels</a
-      >
+      <a routerLink="/" class="text-sm font-medium hover:text-white/80">Our hotels</a>
       @if (session.role() !== null) {
-        <a routerLink="/admin" class="text-sm font-medium text-slate-700 hover:text-slate-900"
-          >Admin</a
-        >
+        <a routerLink="/admin" class="text-sm font-medium hover:text-white/80">Admin</a>
       }
     </nav>
 
@@ -19,7 +15,7 @@
 
     <button
       type="button"
-      class="md:hidden"
+      class="md:hidden hover:text-white/80"
       [attr.aria-expanded]="mobileMenuOpen()"
       aria-controls="mobile-nav"
       [attr.aria-label]="mobileMenuOpen() ? 'Close menu' : 'Open menu'"
@@ -32,12 +28,12 @@
   </div>
 
   @if (mobileMenuOpen()) {
-    <nav id="mobile-nav" aria-label="Primary" class="border-t border-slate-200 px-4 py-3 md:hidden">
-      <a routerLink="/" class="block py-2 text-sm font-medium text-slate-700">Our hotels</a>
+    <nav id="mobile-nav" aria-label="Primary" class="border-t border-white/20 px-4 py-3 md:hidden">
+      <a routerLink="/" class="block py-2 text-sm font-medium hover:text-white/80">Our hotels</a>
       @if (session.role() !== null) {
-        <a routerLink="/admin" class="block py-2 text-sm font-medium text-slate-700">Admin</a>
+        <a routerLink="/admin" class="block py-2 text-sm font-medium hover:text-white/80">Admin</a>
       }
-      <div class="mt-2 border-t border-slate-200 pt-2">
+      <div class="mt-2 border-t border-white/20 pt-2">
         <ng-container [ngTemplateOutlet]="userArea" />
       </div>
     </nav>
@@ -49,8 +45,8 @@
     <div class="h-8 w-24 animate-pulse rounded-full bg-slate-200" aria-hidden="true"></div>
   } @else if (!session.user()) {
     <div class="flex items-center gap-4 text-sm font-medium">
-      <a routerLink="/login" class="text-slate-700 hover:text-slate-900">Log in</a>
-      <a routerLink="/register" class="text-slate-700 hover:text-slate-900">Create account</a>
+      <a routerLink="/login" class="hover:text-white/80">Log in</a>
+      <a routerLink="/register" class="hover:text-white/80">Create account</a>
     </div>
   } @else {
     <div #userMenuRoot class="relative text-sm">
@@ -59,15 +55,15 @@
         (click)="toggleUserMenu()"
         aria-haspopup="menu"
         [attr.aria-expanded]="userMenuOpen()"
-        class="flex items-center gap-3"
+        class="flex items-center gap-3 hover:text-white/80"
       >
-        <span class="font-medium text-slate-900">{{ session.user()?.firstName }}</span>
+        <span class="font-medium">{{ session.user()?.firstName }}</span>
         @if (roleBadge(); as badge) {
           <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">{{
             badge
           }}</span>
         }
-        <span aria-hidden="true" class="text-slate-500">▾</span>
+        <span aria-hidden="true">▾</span>
       </button>
 
       @if (userMenuOpen()) {

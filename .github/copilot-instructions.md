@@ -115,6 +115,10 @@ one backend is drift.
   the act, used only in UI copy. `property` in code; `hotel` is permitted in guest-facing copy only.
   Role labels in UI are exactly "Front Desk" and "Manager".
 - **Money is a string end to end.** Parsing it into a `number` is a defect, not a simplification.
+- **Brand color is `bg-brand`/`hover:bg-brand-hover`, defined once as a Tailwind `@theme` token in
+  `src/styles.css` (GM blue `#0671d8`, hover `#055aad` — see `stacks/angular/ui-specifications.md`'s
+  "Brand color" note). The header background and every primary action button use it. Never hard-code
+  the hex or fall back to a Tailwind default like `blue-600` in a new component.
 - **Dates carry their type in the name**: `_date` for calendar dates, `_at` for timestamps. The
   product is "dates only, no times", so confusing them is a business-logic bug.
 - **Commits** follow Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`). A commit

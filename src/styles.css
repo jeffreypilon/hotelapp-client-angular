@@ -1,1 +1,8 @@
 @import 'tailwindcss';
+
+/* Brand color: GM blue, matches General_Motors_(2021).svg. Single source of truth for
+   both frontends -- see hotelapp-context/shared/ui-specifications.md's "Brand color" note. */
+@theme {
+  --color-brand: #0671d8;
+  --color-brand-hover: #055aad;
+}
